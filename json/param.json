@@ -1,0 +1,133 @@
+{
+    "type_map": [
+        "Al"
+    ],                              #指定原子类型。体系有多少种原子，就指定多少种
+    "mass_map": [
+        27
+    ],                              #指定原子类型。体系有多少种原子，就指定多少种
+    "init_data_prefix":"./",        #为迭代0中的00.train 训练指定 初始数据目录的前缀   
+    "init_data_sys": [
+        "Al.POSCAR.02x02x02/02.md/sys-0032/deepmd"
+    ],                              #为00.train指定初始训练数据所在目录，可以使用绝对路径或相对路径。（例如，可以对应stage 4 中deepmd中的数据）
+    "sys_configs_prefix":"./",      #指定进行01.model_devi MD模拟的起始构象所在目录的前缀
+    "sys_configs": [
+        [
+            "Al.POSCAR.02x02x02/01.scale_pert/sys-0032/scale-1.000/00000[0-9]/POSCAR"
+        ],
+        [
+            "Al.POSCAR.02x02x02/01.scale_pert/sys-0032/scale-1.000/00001*/POSCAR"
+        ],
+        [
+            "Al.POSCAR.02x02x02/01.scale_pert/sys-0032/scale-1.000/00002*/POSCAR"
+        ],
+        [
+            "Al.POSCAR.02x02x02/01.scale_pert/sys-0032/scale-1.000/00003*/POSCAR"
+        ],
+        [
+            "Al.POSCAR.02x02x02/01.scale_pert/sys-0032/scale-1.000/00004*/POSCAR"
+        ]
+    ],                                         #指定 01.model_devi MD 的起始构象。可以使用绝对路径或相对路径，支持通配符。
+    "_comment": " 00.train ",
+    "numb_models": 4,                          #指定 00.train 训练的模型数量
+    "default_training_param": {
+        "model": {
+            "type_map": ["Al"],                #指定原子类型。体系有多少种原子，就指定多少种
+            "descriptor": {
+                "type": "se_a",                #调用deepmd-kit时的描述符类型
+                "sel": "Auto",                 #指定在系统截断半径内的所计算相互作用最大紧邻原子数目，可使用自动
+                "rcut_smth": 2.0,              #指定系统计算的截断半径平滑度
+                "rcut": 6.0,                   #指定系统计算的截断半径
+                "neuron": [25, 50, 100],       #三层embedding net的大小
+                "resnet_dt": false,            #是否开启残差网络
+                "axis_neuron": 12,
+                "seed": 0                      #训练随机数seed
+            },
+            "fitting_net": {
+                "neuron": [120, 120, 120],     #三层fiting net的大小
+                "resnet_dt": true,             #是否开启残差网络
+                "seed": 0                      #训练随机数seed
+            }
+        },
+        "learning_rate": {
+            "type": "exp",
+            "start_lr": 0.001,                 #初始学习率
+            "decay_steps": 1000,               #学习率衰减步数
+        },
+        "loss": {
+            "start_pref_e": 0.02,              #初始能量loss function系数
+            "limit_pref_e": 2,                 #结束训练能量loss function系数
+            "start_pref_f": 1000,              #初始受力loss function系数
+            "limit_pref_f": 1,                 #结束训练受力loss function系数
+            "start_pref_v": 0.0,               #初始维里loss function系数
+            "limit_pref_v": 0.0                #结束训练维里loss function系数
+        },
+        "training": {
+            "stop_batch": 4000,                #训练步数
+            "disp_file": "lcurve.out",         #训练受力、能量、维里偏差输出文件
+            "disp_freq": 200,                  #每隔200步更新一次
+            "numb_test": 4,                    #训练模型个数
+            "save_freq": 1000,                 #每隔1000步更新保存一次
+            "save_ckpt": "model.ckpt",         #保存模型
+            "disp_training": true,
+            "time_training": true,
+            "profiling": false,
+            "profiling_file": "timeline.json", #训练保存文件
+            "_comment": "that's all"
+        }
+    },
+
+    "_comment": " 01.model_devi ",
+    "model_devi_dt": 0.002,                           #指定本次迭代中01.model_devi MD的时间步长，单位:ps
+    "model_devi_skip": 0,                             #指定01.model_devi 筛选构象时，跳过每个MD轨迹起始帧的数量
+    "model_devi_f_trust_lo": 0.05,                    #指定 01.model_devi 筛选构象的模型偏差力判据下界
+    "model_devi_f_trust_hi": 0.15,                    #指定 01.model_devi 筛选构象的模型偏差力判据上界
+    "model_devi_e_trust_lo": 10000000000.0,           #指定 01.model_devi 筛选构象的模型偏差能量判据下界。
+    "model_devi_e_trust_hi": 10000000000.0,           #指定 01.model_devi 筛选构象的模型偏差能量判据上界
+    "model_devi_clean_traj": true,                    #指定 01.model_devi是否清除输出文件中记载 MD 轨迹的 traj文件夹(以节省空间)
+    "model_devi_jobs": [
+        {
+            "_idx": "00",                             #指定01.model_devi 本次迭代的迭代序号
+            "ensemble": "npt",                        #指定 01.model_devi 本次迭代 MD选取的系综。 选项 包括 “npt” 和 “nvt”
+            "nsteps": 300,                            #指定 01.model_devi 本次迭代MD的步数
+            "press": [
+              1.0
+            ],                                        #指定 01.model_devi 本次迭代 MD 的压力 (Bar)，可在一次迭代中设置多个压力值
+            "temps": [                        
+              50.0
+            ],                                        #指定 01.model_devi 本次迭代 MD 的温度 (K)，可在一次迭代中设置多个温度值
+            "sys_idx": [
+              0,
+              1,
+              2
+            ],                                        #指定 01.model_devi 本次迭代选sys_configs 中的哪些构象作为 MD的起始构象                         
+            "trj_freq": 10                            #指定 01.model_devi 本次迭代存储 MD轨迹中 snapshot 的频率
+        },
+        {
+            "_idx": "01",                             #指定第二次迭代参数设置
+            "ensemble": "npt",
+            "nsteps": 300,
+            "press": [
+              1.0
+            ],
+            "temps": [
+              200.0
+            ],
+            "sys_idx": [
+              3,
+              4
+            ],
+            "trj_freq": 10
+        }
+    ],
+
+    "_comment": " 02.fp ",
+    "fp_style": "vasp",                               #指定 02.fp 调用的第一性原理计算软件。选项：目前包括 "vasp", "pwscf", "siesta","gaussian" 和 "cp2k"
+    "shuffle_poscar": false,
+    "fp_task_max": 80,                                #指定每次迭代 02.fp 中计算选取的最大构象数量，即进行第一性原理单点计算的构象个数上限
+    "fp_task_min": 8,                                 #指定每次迭代 02.fp 中计算选取的最小构象数量，即进行第一性原理单点计算的构象个数下限
+    "fp_pp_path": "./",                               #指定 02.fp vasp计算所需赝势文件的存储路径
+    "fp_pp_files": [
+        "POTCAR_Al"
+    ],                                                #指定 02.fp vasp计算所需的赝势文件。原子类型的顺序（元素）需与type_map中记录的原子类型（元素）顺序一致
+    "fp_incar": "./INCAR"                             #指定 02.fp vasp计算所需的 INCAR输入文件，INCAR 中必须指定 KSPACING
+}                                                     

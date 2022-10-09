@@ -1,0 +1,71 @@
+{
+  "api_version": "1.0",
+  "deepmd_version": "2.1.1",
+  "train": [
+  {
+      "machine":{
+       "batch_type":   "Slurm",              #sluem队列
+       "context_type": "LocalContext",       #通过本地文件存储系统（如cp, mv等）拷贝传输
+       "local_root" : "./",                  #在DP-GEN中始终设置为“./”
+       "remote_root": "./train_work"         #DP-GEN的任务会被打包传到这个文件夹并在其中运行和计算，需要根据任务是在本地还是远程服务器来指定路径，需要确保这个路径存在
+      },
+      "resources": {
+        "number_node": 2,                    #每个任务使用节点数
+        "cpu_per_node": 64,                  #每个节点使用的CPU数
+        "gpu_per_node":0,                    #每个节点使用的GPU数
+        "queue_name": "amd_256",
+	      "source_list": ["~/.bashrc; export OMP_NUM_THREADS=4; export TF_INTRA_OP_PARALLELISM_THREADS=10; export TF_INTER_OP_PARALLELISM_THREADS=10"],  #要加载的环境文件的路径，把类似于export PATH =“xxx:$PATH”的语句写到环境文件中，在跑任务前会先激活这些环境文件
+        "group_size": 1,                     #把多少任务放到一个提交脚本里
+        "_comment": "that's All"            
+      },
+      "command": "dp"                         #运行命令
+      
+    }
+
+  ],
+
+   "model_devi": [
+    {
+      "machine": {
+       "batch_type":   "Slurm",               #sluem队列
+       "context_type": "LocalContext",        #通过本地文件存储系统（如cp, mv等）拷贝传输
+       "local_root" : "./",                   #在DP-GEN中始终设置为“./”
+       "remote_root": "./model_work"          #DP-GEN的任务会被打包传到这个文件夹并在其中运行和计算，需要根据任务是在本地还是远程服务器来指定路径，需要确保这个路径存在
+      },
+      "resources": {
+        "number_node": 2,                     #每个任务使用节点数
+        "cpu_per_node": 64,                   #每个节点使用的CPU数
+        "queue_name": "amd_256",        
+        "gpu_per_node":0,                     #每个节点使用的GPU数
+	      "source_list": ["~/.bashrc; export OMP_NUM_THREADS=10; export TF_INTRA_OP_PARALLELISM_THREADS=10; export TF_INTER_OP_PARALLELISM_THREADS=4"],
+        "group_size": 10,                     #把多少任务放到一个提交脚本里
+        "_comment": "that's All"
+   },
+      "command": "lmp -i input.lammps"         #运行命令
+   }
+  ],
+
+    "fp": [
+    {
+      "machine": {
+        "batch_type":   "Slurm",                #sluem队列
+        "context_type": "LocalContext",         #通过本地文件存储系统（如cp, mv等）拷贝传输
+        "local_root" : "./",                    #在DP-GEN中始终设置为“./”
+        "remote_root": "./fp_work"              #DP-GEN的任务会被打包传到这个文件夹并在其中运行和计算，提交到远程服务器时要指定远程服务器上的一个存在的路径
+      },
+      "resources": {
+        "number_node": 1,                       #每个任务使用节点数
+        "cpu_per_node": 64,                     #每个节点使用的CPU数
+        "queue_name": "amd_256",                #每个节点使用的GPU数
+        "gpu_per_node":1,                       #把多少任务放到一个提交脚本里
+        "source_list": ["/public3/soft/module/module.sh"],  #加载环境
+        "module_purge": true,
+        "module_list": ["mpi/intel/19.3.0"],    #加载module环境
+        "envs" : {"PATH" : "/public3/home/sc72465/software/vasp.5.4.4/bin:$PATH"},
+        "group_size": 17,                       #每组机器任务分配数量    
+        "_comment": "that's All"
+      },
+      "command": "srun  vasp_std"               #运行命令
+    }
+  ]
+}

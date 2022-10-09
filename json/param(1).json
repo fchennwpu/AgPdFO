@@ -1,0 +1,21 @@
+{
+    "stages":       [1,2,3,4],            #指定 init_bulk 的执⾏步骤。可每步或多步执⾏
+    "cell_type":	"fcc",                #指定 stages 1 ⽣成结构的晶型
+    "latt":         10.0,                 #指定 stages 1 ⽣成结构的单胞晶格常数
+    "super_cell":	[2, 2, 2],            #指定 stages 1 ⽣成结构的超胞
+    "elements":		["Al"],               #指定原⼦类型（元素种类）。体系有多少种原⼦，就指定多少种
+    "from_poscar":	true,                 #指定 stages 1 是否采⽤POSCAR⽂件中结构作为初始弛豫结构
+    "from_poscar_path":	"./Al.POSCAR",    #指定 stages 1 POSCAR ⽂件的路径
+    "potcars":		["./POTCAR_Al"],      #指定 stages 1 stages 3 VASP计算所需 POTCAR ⽂件的路径，必须赋值
+    "relax_incar": 	"./INCAR_Al.rlx",     #指定 stages 1 中 VASP结构做弛豫所需 INCAR ⽂件的路径
+    "md_incar" : 	"./INCAR_Al.md",      #指定 stages 3 ⽤VASP做 AIMD 所需 INCAR ⽂件的路径
+    "scale":		[1.00],               #指定 stages 2 放缩 stages 1结构超胞盒⼦⼤⼩的标量倍率(可执⾏多个放缩)    
+    "skip_relax":	false,                #指定 stages 2 是否使⽤ stages 1中未弛豫的POSCAR 结构做放缩扰动
+    "pert_numb":	50,                   #指定 stages 2 对每个放缩后结构执⾏扰动(同时扰动晶格⽮量和原⼦位置)的数量    
+    "md_nstep" : 	10,                   #指定 stage 3 vasp中AIMD模拟的步数
+    "pert_box":		0.03,                 #指定 stages 2 扰动 晶体盒⼦⽮量 的⽐率，扰动值原值
+    "pert_atom":	0.01,                 #指定 stages 2 扰动 原⼦位置 的⼤⼩(Å)
+    "coll_ndata":	5000,                 #指定 stages 4 收集 stages 3 数据的最⼤数量
+    "type_map":     ["Al"],               #指定 stages 4 整理训练数据时，按 deepmd ⽂件格式记录元素种类的顺序
+    "_comment":		"that's all"          #备注⾏
+}
