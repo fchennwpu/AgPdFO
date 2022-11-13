@@ -1,0 +1,22 @@
+units metal
+boundary s s s
+atom_style atomic
+
+read_data Ag10dec.lmp
+mass            1 107.8682
+     
+
+
+# specify the potential
+pair_style eam/alloy
+pair_coeff  * * PdAgH_HybridPd3Ag.eam.alloy.txt Ag 
+
+minimize 1.0e-12 1.0e-12 10000 10000
+
+thermo  10
+thermo_style custom step temp etotal lx ly lz press pxx pyy pzz 
+
+dump     1 all custom 10 Ag10dec_lmp.xyz id type x y z
+
+velocity all create 300 12345
+run 100

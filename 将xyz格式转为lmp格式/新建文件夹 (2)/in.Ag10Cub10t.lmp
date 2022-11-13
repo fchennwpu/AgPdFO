@@ -1,0 +1,24 @@
+#初始模拟系统设置
+units metal
+boundary s s s
+atom_style atomic
+
+#读取模型
+read_data Ag10Cub10t.lmp
+mass   1 107.8682
+     
+#定义相互作用势
+pair_style eam/alloy
+pair_coeff  * * PdAgH_HybridPd3Ag.eam.alloy.txt Ag 
+
+#能量最小化
+minimize 1.0e-12 1.0e-12 10000 10000
+
+#定义输出信息
+thermo  10
+thermo_style custom step temp etotal lx ly lz press pxx pyy pzz 
+dump     1 all custom 10 Ag10Cub10t_lmp.xyz id type x y z
+
+#运行
+velocity all create 300 12345
+run 100
